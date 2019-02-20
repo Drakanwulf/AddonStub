@@ -1,2 +1,2 @@
 # AddonStub
-A Standalone Stub for loading and updating standalone add-ons.
+A Standalone Stub for starting and updating standalone add-ons.
