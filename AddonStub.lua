@@ -65,6 +65,7 @@ API:
 Control Entry layout for:
 	_G["addonName"] = {
 		addOnVersion,                    	-- AddOnVersion from the code (e.g. MINOR)
+		apiVersion,							-- Current API version number from the game
 		index,								-- Ordinal position of this add-on in the AddOnManager's add-on table
 		manifest = {
 			-- These values are returned from API functions
@@ -73,6 +74,7 @@ Control Entry layout for:
 			isEnabled,						-- ESO boolean value
 			loadState,						-- ESO load state (i.e. loaded; not loaded)
 			isOutOfDate,					-- ESO boolean value
+
 			-- These values come from the manifest file	directives
 			addOnVersion,					-- From the AddonVersion: directive (new as of 100026)
 			rawAuthor,						-- From the Author: directive
@@ -80,9 +82,10 @@ Control Entry layout for:
 			description,					-- From the Description: directive
 			author,							-- "rawAuthor" sans any special characters
 			title,							-- "rawTitle" sans any special characters
+
+			-- Fields I wish were retrievable from the manifest file
+			-- OODVersion = AM:GetAPIVersion( i ),		-- The API number from the manifest file
 		},
-		-- Fields I wish were retrievable from the manifest file
-		-- OODVersion = AM:GetAPIVersion( i ),					-- The API number from the manifest file...
 	}
 
 WARNING: This add-on is a standalone stub. Do NOT embed it within your add-on folder!
@@ -133,10 +136,10 @@ local function BuildManifestTable( addonName: string )
 				-- Fields I wish were retrievable from the manifest file
 				-- OODVersion = AM:GetAPIVersion( i ),					-- The API value from the manifest file...
 			}
-
+			-- An AddOnVersion: directive number must exist in the manifest
 			oldversion = manifestInfo.addOnVersion
 			if not oldversion or oldversion == 0 then
-				error( strformat( "AddonStub:BuildManifestTable: AddOnVersion: number is missing for %s!", addonName ), 2 )
+				error( strformat( "AddonStub:BuildManifestTable: AddOnVersion number is missing for %s!", addonName ), 2 )
 			end
 			
 			return i, manifestInfo
@@ -156,15 +159,17 @@ local MAJOR, MINOR = "AddonStub", 100
 local AddonStub = _G[MAJOR] or nil				-- Point to the latest AddonStub, if there is one.
 if not AddonStub or AddonStub.addOnVersion < MINOR then
 	AddonStub = {}
-	AddonStub.addOnVersion = MINOR
+	AddonStub.apiVersion = GetAPIVersion()
 	AddonStub.index, AddonStub.manifest = BuildManifestTable( MAJOR )
 	-- The AddOnVersion: directive values in the code and manifest must match!
 	oldversion = AddonStub.manifest.addOnVersion
 	if oldversion ~= MINOR then
 		error( strformat( "AddonStub:V%q: AddOnVersion numbers do not match (Manifest vs MINOR)!", tostring( oldversion ) ), 2 )
 	end
+	AddonStub.addOnVersion = MINOR
 	_G[MAJOR] = AddonStub
--- Trap and fail any attempts to load AddonStub multiple times.
+
+-- Trap and fail any attempt to load AddonStub multiple times
 else
 	oldversion = AddonStub.addOnVersion or 0
 	if oldversion == MINOR then
@@ -184,7 +189,7 @@ function AddonStub:Get( addonName: string )
 	addon = _G[addonName]							-- Point to the latest version of addonName, if there is one.
 	-- Return existing control entry values
 	if addon then
-		return addon, addon.addOnVersion or nil
+		return addon, addon.addOnVersion
 	else
 		return nil, nil
 	end
@@ -196,23 +201,27 @@ function AddonStub:New( addonName: string, version: number )
 	-- Either create or reset and reload a control entry. Anything else is a mistake!
 	if not addon or addon.addOnVersion < version then
 		addon = {}
+		addon.apiVersion = GetAPIVersion()
 		addon.index, addon.manifest = BuildManifestTable( addonName )
 		-- The AddOnVersion: directive values in the code and manifest must match!
 		oldversion = AddonStub.manifest.addOnVersion
-		if oldversion ~= MINOR then
-			error( strformat( "AddonStub:%s V%q, AddOnVersion numbers do not match (Manifest vs MINOR)!", addonName, 
-								tostring( MINOR ) ), 2 )
+		if oldversion ~= version then
+			error( strformat( "AddonStub:V%q: AddOnVersion numbers do not match (Manifest vs MINOR)!", tostring( oldversion ) ), 2 )
 		end
 		addon.addOnVersion = version
 		_G[addonName] = addon
+
 		return addon, version
+
 	-- Reject all attempts to load older or duplicate versions of an add-on.
 	else
 		oldversion = addon.addOnVersion
 		if oldversion == version then
-			error( strformat( "AddonStub:New: Will not start up duplicate copies of the same add-on! %s V%q", addonName, tostring( oldversion ) ), 2 )
+			error( strformat( "AddonStub:New will not start up duplicate copies of the same add-on! %s V%q", addonName, 
+								tostring( oldversion ) ), 2 )
 		else
-			error( strformat( "AddonStub:New: Will not start up older versions of the same add-on! %s V%q", addonName, tostring( oldversion ) ), 2 )
+			error( strformat( "AddonStub:New will not start up older versions of the same add-on! %s V%q", addonName, 
+								tostring( oldversion ) ), 2 )
 		end
 	end
 end
