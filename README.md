@@ -1,2 +1,2 @@
 # AddonStub
-A standalone stub for starting and updating standalone add-ons.
+A Standalone stub add-on for starting and updating standalone add-ons.
