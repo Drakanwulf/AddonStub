@@ -74,18 +74,15 @@ Control Entry layout for:
 			isEnabled,					-- ESO boolean value
 			loadState,					-- ESO load state (i.e. loaded; not loaded)
 			isOutOfDate,					-- ESO boolean value
-			isLibrary,						-- ESO boolean from the manifest (new as of 100027)
 
 			-- These values come from the manifest file directives
 			addOnVersion,					-- From the AddonVersion: directive (new as of 100026)
+			isLibrary,					-- From the IsLibrary directive (new as of 100027)
 			rawAuthor,					-- From the Author: directive
 			rawTitle,					-- From the Title: directive
 			description,					-- From the Description: directive
 			author,						-- "rawAuthor" sans any special characters
 			title,						-- "rawTitle" sans any special characters
-
-			-- Fields I wish were retrievable from the manifest file
-			-- OODVersion = AM:GetAPIVersion( i ),		-- The API number from the manifest file
 		},
 	}
 
@@ -120,31 +117,29 @@ local function BuildManifestTable( addonName: string )
 			-- Load the table with addon manifest information
 			local file, name, auth, desc, enabled, state, isOOD, isLib = AM:GetAddOnInfo( i )
 			local manifestInfo = {
-				fileName = file or "",				-- The add-on's folder and file name
-				rawAuthor = auth or "",				-- Raw text including coloring, etc.
-				rawTitle = name or "",				-- Raw text including coloring, etc.
-				description = desc or "",			-- From the manifest file
-				author = Strip( auth ) or "",			-- "rawAuthor" sans special characters
-				title = Strip( name ) or "",			-- "rawTitle" sans special characters
-				isEnabled = enabled,				-- ESO boolean value
-				loadState = state,				-- ESO load state (i.e. loaded; not loaded)
-				isOutOfDate = isOOD,				-- ESO boolean value
+				fileName = file or "",			-- The add-on's folder and file name
+				rawAuthor = auth or "",			-- Raw text including coloring, etc.
+				rawTitle = name or "",			-- Raw text including coloring, etc.
+				description = desc or "",		-- From the manifest file
+				author = Strip( auth ) or "",		-- "rawAuthor" sans special characters
+				title = Strip( name ) or "",		-- "rawTitle" sans special characters
+				isEnabled = enabled,			-- ESO boolean value
+				loadState = state,			-- ESO load state (i.e. loaded; not loaded)
+				isOutOfDate = isOOD,			-- ESO boolean value
 
 				-- New manifest fields as of API 100026
 				addOnVersion = AM:GetAddOnVersion( i ) or 0,		-- The value from the manifest file
 				filePath = AM:GetAddOnRootDirectoryPath( i ) or "",	-- Path to the add-on file
 
 				-- New manifest fields as of API 100027
-				isLibrary = isLib or 0,				-- The boolean value from the manifest
-
-				-- Fields I wish were retrievable from the manifest file
-				-- OODVersion = AM:GetAPIVersion( i ),					-- The API value from the manifest file...
+				isLibrary = isLib or 0,			-- The boolean value from the manifest
 			}
+
 			-- If an AddOnVersion: directive and its number does not exist in the manifest, fail the add-on
 			oldversion = manifestInfo.addOnVersion
 			if not oldversion or oldversion == 0 then
 				error( strformat( "AddonStub:BuildManifestTable: AddOnVersion number is missing from the %s manifest file!", 
-									addonName ), 2 )
+							addonName ), 2 )
 			end
 			
 			return i, manifestInfo
