@@ -1,7 +1,9 @@
 ﻿## Title: AddonStub
-## Description: A standalone support stub for loading and updating standalone add-ons. 
-## Version: 1.0.0
+## Description: A standalone support stub for loading and updating standalone add-ons.
+## APIVersion: 100026 100027
 ## AddOnVersion: 100
+## Version: 1.0.0
+## IsLibrary: true
 ## Contributors: Seerah, sirinsidiator, Votan, Baertram, and many more
 ## Author: Drakanwulf & Hawkeye1889
 
