@@ -84,6 +84,27 @@ Control Entry layout for:
 			author,						-- "rawAuthor" sans any special characters
 			title,						-- "rawTitle" sans any special characters
 		},
+		manifest = {
+			-- These values are returned from API functions
+			fileName,		-- The add-on's folder and file name
+			isEnabled,		-- Boolean value
+			loadState,		-- Load state (i.e. loaded; not loaded)
+			isOutOfDate,		-- Boolean value
+
+			-- These values come from manifest file directives
+			rawAuthor,		-- Raw text including coloring, etc.
+			rawTitle,		-- Raw text including coloring, etc.
+			description,		-- Descriptive text about this add-on
+			author,			-- "rawAuthor" sans special characters
+			title,			-- "rawTitle" sans special characters
+
+			-- These values come from new manifest fields as of API 100026
+			addOnVersion,		-- The AddOnVersion: number
+			filePath,		-- Path to the add-on file name
+
+			-- These values come from new manifest fields as of API 100027
+			isLibrary,		-- Boolean value
+		},
 	}
 
 WARNING: This add-on is a standalone stub. Do NOT embed it within your add-on folder!
@@ -117,22 +138,25 @@ local function BuildManifestTable( addonName: string )
 			-- Load the table with addon manifest information
 			local file, name, auth, desc, enabled, state, isOOD, isLib = AM:GetAddOnInfo( i )
 			local manifestInfo = {
+				-- These values are returned from API functions
 				fileName = file or "",			-- The add-on's folder and file name
+				isEnabled = enabled,			-- Boolean value
+				loadState = state,			-- Load state (i.e. loaded; not loaded)
+				isOutOfDate = isOOD,			-- Boolean value
+
+				-- These values come from manifest file directives
 				rawAuthor = auth or "",			-- Raw text including coloring, etc.
 				rawTitle = name or "",			-- Raw text including coloring, etc.
-				description = desc or "",		-- From the manifest file
+				description = desc or "",		-- Descriptive text about this add-on
 				author = Strip( auth ) or "",		-- "rawAuthor" sans special characters
 				title = Strip( name ) or "",		-- "rawTitle" sans special characters
-				isEnabled = enabled,			-- ESO boolean value
-				loadState = state,			-- ESO load state (i.e. loaded; not loaded)
-				isOutOfDate = isOOD,			-- ESO boolean value
 
-				-- New manifest fields as of API 100026
-				addOnVersion = AM:GetAddOnVersion( i ) or 0,		-- The value from the manifest file
+				-- These values come from new manifest fields as of API 100026
+				addOnVersion = AM:GetAddOnVersion( i ) or 0,		-- The AddOnVersion: number
 				filePath = AM:GetAddOnRootDirectoryPath( i ) or "",	-- Path to the add-on file
 
-				-- New manifest fields as of API 100027
-				isLibrary = isLib or 0,			-- The boolean value from the manifest
+				-- These values come from new manifest fields as of API 100027
+				isLibrary = isLib or 0,			-- Boolean value
 			}
 
 			-- If an AddOnVersion: directive and its number does not exist in the manifest, fail the add-on
